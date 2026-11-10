@@ -763,11 +763,17 @@ vis();setTimeout(()=>document.getElementById('hint').style.opacity=0,6000);
  const q=document.getElementById('q'),res=document.getElementById('qres');if(!q||!res)return;
  const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]+/g,'').replace(/\s+/g,' ').trim();
  let hits=[],sel=0;
+ function nicePlace(s){const small=new Set(['of','the','and','in','on','at','to','for','a','an','by']);
+  const fix=(w,first)=>{if(w.length<2||/^[IVXLCDM]+$/.test(w))return w;
+   const bad=w===w.toUpperCase()&&/[A-Z]/.test(w)||/^[a-z]+[A-Z]/.test(w)||/[a-z][A-Z]/.test(w);if(!bad)return w;
+   const l=w.toLowerCase();if(!first&&small.has(l))return l;
+   return l.replace(/(^|[-'\u2019])([a-z])/g,(m,p,c)=>p==="'"||p==='\u2019'?m:p+c.toUpperCase())};
+  return s.replace(/\s+/g,' ').trim().split(' ').map((w,i)=>fix(w,i===0)).join(' ')}
  function find(v){
   const n=norm(v);if(!n)return[];const out=[];
   (typeof LBL!=='undefined'?LBL:[]).forEach(l=>{
    if(NOOPT.has(l.id))return;
-   const t=String(l.text||'').replace(/\n/g,' '),nt=norm(t),nn=nt.replace(/^the /,'');
+   const t=nicePlace(String(l.text||'').replace(/\n/g,' ')),nt=norm(t),nn=nt.replace(/^the /,'');
    let sc=-1;if(nt===n||nn===n)sc=0;else if(nn.startsWith(n)||nt.startsWith(n))sc=1;else if((' '+nt).includes(' '+n))sc=2;else if(nt.includes(n))sc=3;
    if(sc>=0)out.push({l,t,sc});
   });
@@ -1003,4 +1009,35 @@ if(!AULET_ADMIN){fetch('aulet-edits.json',{cache:'no-cache'}).then(r=>r.ok?r.jso
  if(d.flaglinks&&typeof d.flaglinks==='object')FLAGLINKS=d.flaglinks;
  if(d.flagedits&&typeof d.flagedits==='object'&&window.applyFlagEdits)window.applyFlagEdits(d.flagedits);
 }).catch(()=>{})}
+
+/* ===== SMOOTHNESS PATCH: cheaper per-frame work while panning / zooming / flying =====
+   - labels keep their layout size while moving and are scaled by the GPU, then snap crisp when you stop
+   - the full-resolution tile canvas is redrawn at most ~5x/second while moving, and once crisp when you stop
+   - nothing about image quality or content changes */
+(function(){
+ const fullVis=window.vis;let idle=0,lastTiles=0;
+ placeLabels=function(){if(!LBL||!lbls)return;
+  const z=sc/minSc,vw=view.clientWidth,vh=view.clientHeight;
+  LBL.forEach(L=>{const el=getEl(L);if(!el)return;
+   let o=1;if(!textMode){const z0=+L.z0||0,z1=+L.z1||99;
+    o=z<z0?Math.max(0,1-(z0-z)/(.3*z0)):z>z1?Math.max(0,1-(z-z1)/(.3*z1)):1}
+   const cx=tx+L.x*WS[0]*sc,cy=ty+L.y*WS[1]*sc,w=el._w*sc,h=el._h*sc,rad=Math.hypot(w,h)/2;
+   const on=o>.02&&L.size*sc>3&&w<9000&&cx+rad>0&&cx-rad<vw&&cy+rad>0&&cy-rad<vh;
+   if(!on){if(el.style.display!=='none')el.style.display='none';return}
+   if(el.style.display!=='block')el.style.display='block';
+   el.style.opacity=o;
+   const base=`translate(${cx.toFixed(1)}px,${cy.toFixed(1)}px) translate(-50%,-50%) rotate(${+L.rot||0}deg)`;
+   if(motion&&el._bs){el.style.transform=base+` scale(${(sc/el._bs).toFixed(4)})`;return}
+   if(el._k!==sc){el.style.width=w+'px';el.style.height=h+'px';
+    if(!motion)el.firstChild.style.filter=`drop-shadow(0 ${(L.size*sc*.05).toFixed(2)}px ${(L.size*sc*.07).toFixed(2)}px rgba(0,0,0,.6))`;
+    el._k=sc;el._bs=sc}
+   el.style.transform=base})};
+ const pins=stage.getElementsByClassName('pin');
+ window.vis=function(){
+  if(!motion){fullVis();return}
+  placeLabels();
+  for(let i=0;i<pins.length;i++)pins[i].style.setProperty('--inv',1/sc);
+  const n=performance.now();if(n-lastTiles>200){lastTiles=n;placeTiles()}
+  clearTimeout(idle);idle=setTimeout(fullVis,230)};
+})();
 </script></body></html>
