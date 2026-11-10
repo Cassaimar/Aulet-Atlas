@@ -28,10 +28,10 @@ h4{margin:12px 0 6px;font-size:11px;letter-spacing:.06em;color:var(--dim);font-w
 #tabs{position:absolute;top:calc(56px + env(safe-area-inset-top,0px));right:12px;display:flex;gap:6px}
 #tabs button{background:var(--panel);border:1px solid var(--line);color:var(--gold);border-radius:8px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
 #tabs button.on{background:rgba(217,180,92,.25)}
-#tabs #tpm{padding:7px 14px 7px 18px;background:linear-gradient(180deg,#f6e3a8,#d4a944);color:#1b1408;border:1.5px solid #fff3c4;border-radius:0;outline:2px solid rgba(0,0,0,.55);font:italic 700 17px "Cormorant Garamond",Georgia,serif;letter-spacing:.2px;white-space:nowrap;box-shadow:0 0 0 3px rgba(233,199,119,.28),0 4px 16px rgba(233,199,119,.4);transition:transform .15s,filter .15s,box-shadow .15s}
+#tabs #tpm{text-align:center;line-height:1.05;padding:6px 12px;background:linear-gradient(180deg,#f6e3a8,#d4a944);color:#1b1408;border:1.5px solid #fff3c4;border-radius:0;outline:2px solid rgba(0,0,0,.55);font:italic 700 17px "Cormorant Garamond",Georgia,serif;letter-spacing:.2px;white-space:normal;box-shadow:0 0 0 3px rgba(233,199,119,.28),0 4px 16px rgba(233,199,119,.4);transition:transform .15s,filter .15s,box-shadow .15s}
 #tabs #tpm:hover,#tabs #tpm:focus-visible{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 0 0 3px rgba(233,199,119,.5),0 6px 20px rgba(233,199,119,.55)}
 #tabs #tpm:active{transform:none;filter:brightness(.96)}
-@media (max-width:700px){#tabs #tpm{font-size:16px;padding:6px 12px 6px 14px}}
+@media (max-width:700px){#tabs #tpm{font-size:15px;padding:5px 10px}}
 #drawer{position:absolute;right:12px;top:calc(98px + env(safe-area-inset-top,0px));bottom:12px;width:min(340px,calc(100% - 24px));background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow:auto;display:none;font-size:14px;z-index:6;line-height:1.5}
 #drawer.on{display:block}
 #drawer h2{margin:0 0 2px;font-size:22px;color:var(--gold);font-weight:normal}
@@ -91,7 +91,7 @@ h4{margin:12px 0 6px;font-size:11px;letter-spacing:.06em;color:var(--dim);font-w
 <h4 style="display:none">Layers</h4><div class="layer" style="display:none"><label><input type="checkbox" id="auto" checked><span>Blend by zoom</span></label><div class="sub">Off = show every ticked layer at once</div></div><div id="layers" style="display:none"></div></div></div>
 <div id="zoom"><button id="zi" aria-label="Zoom in">+</button><button id="zo" aria-label="Zoom out">&minus;</button><button id="zf" aria-label="Fit" style="font-size:14px">fit</button></div>
 <div id="hint">Drag to pan &middot; scroll or pinch to zoom &middot; the map changes detail as you zoom in</div>
-<div id="tabs"><button id="tpm" onclick="aletGo(AULET_POLITICAL_URL)">Political Map →</button><button id="tp">Political</button><button id="te">Edit pins</button><button id="tt">Edit text</button></div><div id="drawer"></div><script>
+<div id="tabs"><button id="tpm" onclick="aletGo(AULET_POLITICAL_URL)">Political<br>Map →</button><button id="tp">Political</button><button id="te">Edit pins</button><button id="tt">Edit text</button></div><div id="drawer"></div><script>
 /* AULET_ADMIN = true  → editing tools on (admin.html, keep this one to yourself)
    AULET_ADMIN = false → public viewer (index.html) – no editing tools; it reads aulet-edits.json if that file sits beside it */
 const AULET_ADMIN=false;
